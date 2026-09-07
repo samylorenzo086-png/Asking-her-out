@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Will you go out with me?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #4d0f2b;
+    --bg-mid: #93264f;
+    --blush: #ffe3ec;
+    --pink: #ff6f91;
+    --pink-dark: #d1477a;
+    --rose-gold: #e8a6bb;
+    --ink: #3a0d20;
+    --paper: #fff7f4;
+    --paper-line: #e8c9d2;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 30% 15%, var(--bg-mid) 0%, var(--bg-deep) 55%, #2c0919 100%);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--blush);
+    overflow-x: hidden;
+    position: relative;
+    padding: 24px 0;
+  }
+
+  .ember {
+    position: absolute;
+    bottom: -10px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--rose-gold);
+    opacity: 0.5;
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    from { transform: translateY(0) translateX(0); opacity: 0.55; }
+    to   { transform: translateY(-110vh) translateX(var(--drift, 20px)); opacity: 0; }
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
+    width: min(92vw, 480px);
+    text-align: center;
+    padding: 44px 32px;
+  }
+
+  .screen { animation: fadein 0.5s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .ornament { width: 110px; margin: 0 auto 26px; display: block; opacity: 0.85; }
+
+  .heading {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    line-height: 1.25;
+    margin: 0 0 36px;
+    color: var(--rose-gold);
+  }
+
+  .subheading {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(1.5rem, 5.5vw, 2rem);
+    color: var(--rose-gold);
+    margin: 0 0 28px;
+  }
+
+  .buttons { display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; min-height: 140px; }
+
+  button { font-family: 'Cormorant Garamond', serif; cursor: pointer; transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease; }
+
+  #yesBtn {
+    background: linear-gradient(180deg, var(--pink), var(--pink-dark));
+    color: #fff; border: none; padding: 16px 40px;
+    font-size: 1.35rem; font-weight: 600; border-radius: 2px;
+    box-shadow: 0 6px 20px rgba(209,71,122,0.4);
+  }
+  #yesBtn:hover { filter: brightness(1.06); }
+
+  .no-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  #noBtn {
+    background: transparent; color: var(--blush);
+    border: 1px solid rgba(255,227,236,0.45);
+    padding: 14px 34px; font-size: 1.35rem; border-radius: 2px;
+  }
+  #noBtn:hover { border-color: var(--blush); }
+  .no-text { font-style: italic; font-size: 1rem; color: rgba(255,227,236,0.75); max-width: 180px; min-height: 1.4em; }
+
+  .rule { width: 60px; height: 1px; background: var(--rose-gold); margin: 22px auto; opacity: 0.6; }
+
+  /* date-type choice */
+  .choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .choice-grid .full { grid-column: 1 / -1; }
+  .choice-card {
+    background: rgba(255,227,236,0.06);
+    border: 1px solid rgba(232,166,187,0.35);
+    color: var(--blush);
+    border-radius: 3px;
+    padding: 20px 12px;
+    font-size: 1.15rem;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .choice-card .icon { font-size: 1.6rem; }
+  .choice-card:hover { border-color: var(--rose-gold); background: rgba(255,227,236,0.1); }
+  .choice-card.selected { border-color: var(--pink); background: rgba(255,111,145,0.18); }
+
+  .continue-btn {
+    margin-top: 30px;
+    background: linear-gradient(180deg, var(--pink), var(--pink-dark));
+    color: #fff; border: none; padding: 13px 34px;
+    font-size: 1.15rem; border-radius: 2px; opacity: 0.4; pointer-events: none;
+    box-shadow: 0 6px 20px rgba(209,71,122,0.3);
+  }
+  .continue-btn.active { opacity: 1; pointer-events: auto; }
+
+  /* calendar */
+  .calendar-card {
+    background: rgba(255,227,236,0.06);
+    border: 1px solid rgba(232,166,187,0.35);
+    border-radius: 3px;
+    padding: 20px;
+  }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-family: 'Playfair Display', serif; font-style: italic; color: var(--rose-gold); font-size: 1.2rem; }
+  .cal-nav { background: none; border: none; color: var(--rose-gold); font-size: 1.3rem; padding: 4px 10px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow { font-size: 0.8rem; opacity: 0.6; padding-bottom: 4px; }
+  .cal-day {
+    background: none; border: none; color: var(--blush);
+    padding: 8px 0; border-radius: 50%; font-size: 0.95rem;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .cal-day:hover:not(.empty):not(.past) { background: rgba(255,227,236,0.15); }
+  .cal-day.selected { background: var(--pink); color: #fff; }
+  .cal-day.empty { pointer-events: none; }
+  .cal-day.past { opacity: 0.25; pointer-events: none; }
+
+  .selected-date-line { margin-top: 16px; font-style: italic; color: var(--rose-gold); min-height: 1.4em; }
+
+  /* note screen */
+  .note-text { font-size: 1.4rem; line-height: 1.6; color: var(--blush); margin-bottom: 8px; }
+  .note-sub { font-size: 1.1rem; color: rgba(255,227,236,0.75); }
+
+  /* receipt */
+  .receipt {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    text-align: left;
+    padding: 26px 22px;
+    border-radius: 2px;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+  }
+  .receipt::before, .receipt::after {
+    content: "";
+    position: absolute; left: 0; right: 0; height: 10px;
+    background:
+      linear-gradient(45deg, transparent 33.333%, var(--bg-deep) 33.333%, var(--bg-deep) 66.667%, transparent 66.667%),
+      linear-gradient(-45deg, transparent 33.333%, var(--bg-deep) 33.333%, var(--bg-deep) 66.667%, transparent 66.667%);
+    background-size: 16px 20px;
+  }
+  .receipt::before { top: -10px; }
+  .receipt::after { bottom: -10px; transform: rotate(180deg); }
+
+  .receipt-center { text-align: center; }
+  .receipt-title { font-weight: 700; font-size: 1rem; letter-spacing: 1px; }
+  .receipt-sub { opacity: 0.7; font-size: 0.72rem; margin-bottom: 10px;}
+  .dash { border-top: 1px dashed var(--paper-line); margin: 10px 0; }
+  .rline { display: flex; justify-content: space-between; gap: 10px; }
+  .rline.total { font-weight: 700; font-size: 0.95rem; margin-top: 6px; }
+  .barcode { display: flex; justify-content: center; gap: 2px; margin: 16px 0 6px; height: 40px; align-items: flex-end; }
+  .barcode div { width: 2px; background: var(--ink); }
+  .receipt-footer { text-align: center; font-style: normal; font-size: 0.75rem; margin-top: 6px; opacity: 0.8; }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ember { animation: none; opacity: 0; }
+    .screen { animation: none; }
+    button { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="screen" id="screen-ask">
+    <svg class="ornament" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 20 C 30 5, 45 5, 60 20 C 75 5, 90 5, 118 20" stroke="#e8a6bb" stroke-width="1"/>
+      <circle cx="60" cy="20" r="3.5" fill="#e8a6bb"/>
+    </svg>
+    <p class="heading">Will you go out with me?</p>
+    <div class="buttons">
+      <button id="yesBtn">Yes</button>
+      <div class="no-wrap">
+        <button id="noBtn">No</button>
+        <span id="noText" class="no-text"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-choice" hidden>
+    <p class="subheading">What kind of date sounds good?</p>
+    <div class="choice-grid">
+      <button class="choice-card" data-choice="Movie Night"><span class="icon">🎬</span>Movie</button>
+      <button class="choice-card" data-choice="Ice Cream Run"><span class="icon">🍦</span>Ice Cream</button>
+      <button class="choice-card" data-choice="Dinner"><span class="icon">🍽️</span>Dinner</button>
+      <button class="choice-card" data-choice="Candlelight"><span class="icon">🕯️</span>Candlelight</button>
+      <button class="choice-card full" data-choice="Surprise Me"><span class="icon">✨</span>Surprise Me</button>
+    </div>
+    <button class="continue-btn" id="toCalendarBtn">Continue</button>
+  </div>
+
+  <div class="screen" id="screen-calendar" hidden>
+    <p class="subheading">Pick the day</p>
+    <div class="calendar-card">
+      <div class="cal-header">
+        <button class="cal-nav" id="prevMonth">‹</button>
+        <span id="calLabel"></span>
+        <button class="cal-nav" id="nextMonth">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="selected-date-line" id="selectedDateLine"></div>
+    <button class="continue-btn" id="toNoteBtn">Continue</button>
+  </div>
+
+  <div class="screen" id="screen-note" hidden>
+    <svg class="ornament" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 20 C 30 5, 45 5, 60 20 C 75 5, 90 5, 118 20" stroke="#e8a6bb" stroke-width="1"/>
+      <circle cx="60" cy="20" r="3.5" fill="#e8a6bb"/>
+    </svg>
+    <p class="note-text">Thank you for saying yes.</p>
+    <p class="note-sub" id="noteSub"></p>
+    <button class="continue-btn active" id="toReceiptBtn" style="margin-top:30px;">See the receipt</button>
+  </div>
+
+  <div class="screen" id="screen-receipt" hidden>
+    <div class="receipt" id="receiptCard"></div>
+  </div>
+
+</div>
+
+<script>
+  // ambient embers
+  const body = document.body;
+  for (let i = 0; i < 20; i++) {
+    const e = document.createElement('div');
+    e.className = 'ember';
+    e.style.left = Math.random() * 100 + 'vw';
+    e.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+    e.style.animationDuration = (6 + Math.random() * 6) + 's';
+    e.style.animationDelay = (Math.random() * 8) + 's';
+    body.appendChild(e);
+  }
+
+  // ---- Ask screen ----
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+  const noText = document.getElementById('noText');
+
+  const phrases = [
+    "please...",
+    "are you sure?",
+    "my heart just sank a little",
+    "come on, reconsider",
+    "I'll wait right here",
+    "still hoping",
+    "you're breaking my heart, gently",
+    "okay but really though",
+    "I made this whole page for you"
+  ];
+
+  let noClicks = 0;
+  let yesScale = 1;
+
+  noBtn.addEventListener('click', () => {
+    noClicks += 1;
+    yesScale = Math.min(yesScale + 0.22, 3.6);
+    yesBtn.style.transform = `scale(${yesScale})`;
+    yesBtn.style.margin = `${(yesScale - 1) * 10}px`;
+    noText.textContent = phrases[(noClicks - 1) % phrases.length];
+    const noScale = Math.max(1 - noClicks * 0.06, 0.55);
+    noBtn.style.transform = `scale(${noScale})`;
+  });
+
+  yesBtn.addEventListener('click', () => {
+    showScreen('screen-choice');
+  });
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.hidden = true);
+    document.getElementById(id).hidden = false;
+  }
+
+  // ---- Choice screen ----
+  let chosenExperience = null;
+  const choiceCards = document.querySelectorAll('.choice-card');
+  const toCalendarBtn = document.getElementById('toCalendarBtn');
+
+  choiceCards.forEach(card => {
+    card.addEventListener('click', () => {
+      choiceCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      chosenExperience = card.dataset.choice;
+      toCalendarBtn.classList.add('active');
+    });
+  });
+
+  toCalendarBtn.addEventListener('click', () => {
+    if (!chosenExperience) return;
+    showScreen('screen-calendar');
+    renderCalendar();
+  });
+
+  // ---- Calendar screen ----
+  let viewDate = new Date();
+  viewDate.setDate(1);
+  let selectedDate = null;
+  const calLabel = document.getElementById('calLabel');
+  const calGrid = document.getElementById('calGrid');
+  const selectedDateLine = document.getElementById('selectedDateLine');
+  const toNoteBtn = document.getElementById('toNoteBtn');
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const dowNames = ["S","M","T","W","T","F","S"];
+
+  function renderCalendar() {
+    calGrid.innerHTML = '';
+    calLabel.textContent = monthNames[viewDate.getMonth()] + ' ' + viewDate.getFullYear();
+
+    dowNames.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      calGrid.appendChild(el);
+    });
+
+    const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    const startOffset = firstDay.getDay();
+    const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    for (let i = 0; i < startOffset; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      calGrid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const btn = document.createElement('button');
+      btn.className = 'cal-day';
+      btn.textContent = d;
+      const thisDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), d);
+      if (thisDate < today) btn.classList.add('past');
+      if (selectedDate && thisDate.getTime() === selectedDate.getTime()) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        selectedDate = thisDate;
+        renderCalendar();
+        selectedDateLine.textContent = thisDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        toNoteBtn.classList.add('active');
+      });
+      calGrid.appendChild(btn);
+    }
+  }
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  toNoteBtn.addEventListener('click', () => {
+    if (!selectedDate) return;
+    const dateStr = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    document.getElementById('noteSub').textContent = `${chosenExperience}, ${dateStr}. Marked down and looking forward to it.`;
+    showScreen('screen-note');
+  });
+
+  // ---- Receipt screen ----
+  document.getElementById('toReceiptBtn').addEventListener('click', () => {
+    buildReceipt();
+    showScreen('screen-receipt');
+  });
+
+  function buildReceipt() {
+    const dateStr = selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    const orderNo = '#' + Date.now().toString().slice(-6);
+    const now = new Date();
+    const issued = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '  ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    const card = document.getElementById('receiptCard');
+    card.innerHTML = `
+      <div class="receipt-center">
+        <div class="receipt-title">HEART &amp; CO.</div>
+        <div class="receipt-sub">date plans, handled with care</div>
+      </div>
+      <div class="dash"></div>
+      <div class="rline"><span>Order</span><span>${orderNo}</span></div>
+      <div class="rline"><span>Issued</span><span>${issued}</span></div>
+      <div class="dash"></div>
+      <div class="rline"><span>1x ${chosenExperience}</span><span>PRICELESS</span></div>
+      <div class="rline"><span>&nbsp;&nbsp;Nerves before asking</span><span>a lot</span></div>
+      <div class="rline"><span>&nbsp;&nbsp;Butterflies</span><span>unlimited</span></div>
+      <div class="rline"><span>&nbsp;&nbsp;Scheduled for</span><span>${dateStr}</span></div>
+      <div class="dash"></div>
+      <div class="rline total"><span>TOTAL</span><span>1 YES</span></div>
+      <div class="dash"></div>
+      <div class="barcode" id="barcode"></div>
+      <div class="receipt-footer">thank you for saying yes<br>no refunds, only good time guaranteed</div>
+    `;
+
+    const barcode = card.querySelector('#barcode');
+    for (let i = 0; i < 34; i++) {
+      const bar = document.createElement('div');
+      const h = 14 + Math.random() * 26;
+      const w = Math.random() > 0.7 ? 2 : 1;
+      bar.style.height = h + 'px';
+      bar.style.width = w + 'px';
+      barcode.appendChild(bar);
+    }
+  }
+</script>
+
+</body>
+</html>
